@@ -85,7 +85,7 @@ func (t *TcpTransport) handleCoon(conn net.Conn)  {
 		return 
 	}
 	
-	msg := &Message{}
+	msg := &Rpc{}
 	// start reading 
 	for {
 		if err := t.Decoder.Decode(conn,msg); err != nil {
