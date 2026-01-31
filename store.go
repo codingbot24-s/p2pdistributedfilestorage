@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+const defaultRoot = "pmcnetwork"
+
 func CASPathTransformFunc(key string) PathKey {
 	hash := sha1.Sum([]byte(key))
 	hashstr := hex.EncodeToString(hash[:])
@@ -40,6 +42,9 @@ func (p *PathKey) FullPath() string {
 }
 
 type StoreOpts struct {
+	// folder name of the store containig
+	// all the files and folder
+	Root string
 	PathTransform
 }
 
@@ -52,6 +57,9 @@ type Store struct {
 }
 
 func NewStore(opts StoreOpts) *Store {
+	if len(opts.Root ) == 0 {
+		opts.Root = defaultRoot
+	}
 	return &Store{
 		StoreOpts: opts,
 	}
@@ -84,13 +92,13 @@ func (s *Store) readStream(key string) (io.ReadCloser, error) {
 func (s *Store) writeStreams(key string, r io.Reader) error {
 	PathKey := s.PathTransform(key)
 
-	if err := os.MkdirAll(PathKey.PathName, os.ModePerm); err != nil {
+	if err := os.MkdirAll(s.Root + "/" + PathKey.PathName, os.ModePerm); err != nil {
 		return err
 	}
 
 	fullPath := PathKey.FullPath()
 
-	f, err := os.Create(fullPath)
+	f, err := os.Create(s.Root + "/" + fullPath)
 	if err != nil {
 		return err
 	}
@@ -113,6 +121,7 @@ func (s *Store) Has(key string) bool {
 
 	return true
 }
+
 func (p PathKey) FirstPathName() string {
 	paths := strings.Split(p.PathName, "/")
 	if len(paths) == 0 {
