@@ -37,7 +37,7 @@ type PathKey struct {
 	filename string
 }
 
-func (p *PathKey) FullPath() string {
+func (p PathKey) FullPath() string {
 	return fmt.Sprintf("%s/%s", p.PathName, p.filename)
 }
 
@@ -84,7 +84,7 @@ func (s *Store) read(key string) (io.Reader, error) {
 
 func (s *Store) readStream(key string) (io.ReadCloser, error) {
 	PathKey := s.PathTransform(key)
-	fullPathWithRoot := fmt.Sprintf("%s/%s", s.Root,PathKey.FullPath() )
+	fullPathWithRoot := fmt.Sprintf("%s/%s", s.Root, PathKey.FullPath())
 	return os.Open(fullPathWithRoot)
 
 }
@@ -95,7 +95,6 @@ func (s *Store) writeStreams(key string, r io.Reader) error {
 	if err := os.MkdirAll(pathNameWithRoot, os.ModePerm); err != nil {
 		return err
 	}
-
 
 	fullPathWithRoot := fmt.Sprintf("%s/%s", s.Root, PathKey.FullPath())
 	f, err := os.Create(fullPathWithRoot)
@@ -122,7 +121,7 @@ func (s *Store) Has(key string) bool {
 	return true
 }
 
-func (p PathKey) FirstPathName() string {
+func (p *PathKey) FirstPathName() string {
 	paths := strings.Split(p.PathName, "/")
 	if len(paths) == 0 {
 		return ""
@@ -132,11 +131,17 @@ func (p PathKey) FirstPathName() string {
 
 func (s *Store) Delete(key string) error {
 	// get the hash
-	path := s.PathTransform(key)
-	// delete with os.Remove return os.Remove
+	pathkey := s.PathTransform(key)
+	
 	defer func() {
 		// here only file
-		fmt.Printf("deleting [%s] from disk \n", path.filename)
+		fmt.Printf("deleting [%s] from disk \n", pathkey.filename)
+		
 	}()
-	return os.RemoveAll(path.FirstPathName())
+	// delete the file with root 
+	firstPathNamewithRoot := fmt.Sprintf("%s/%s", s.Root, pathkey.FirstPathName())	
+	// TODO: cant remove the main dir  
+	os.RemoveAll(firstPathNamewithRoot)
+
+	return nil 
 }

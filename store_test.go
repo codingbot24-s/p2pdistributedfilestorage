@@ -51,5 +51,5 @@ func TestStore(t *testing.T) {
 		t.Errorf("got %q, want %q", string(b), string(data))
 	}
 
-	// s.Delete(key)
+	s.Delete(key)
 }
