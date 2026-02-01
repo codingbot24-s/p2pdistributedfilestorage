@@ -57,7 +57,7 @@ type Store struct {
 }
 
 func NewStore(opts StoreOpts) *Store {
-	if len(opts.Root ) == 0 {
+	if len(opts.Root) == 0 {
 		opts.Root = defaultRoot
 	}
 	return &Store{
@@ -83,22 +83,22 @@ func (s *Store) read(key string) (io.Reader, error) {
 }
 
 func (s *Store) readStream(key string) (io.ReadCloser, error) {
-
 	PathKey := s.PathTransform(key)
-	return os.Open(PathKey.FullPath())
+	fullPathWithRoot := fmt.Sprintf("%s/%s", s.Root,PathKey.FullPath() )
+	return os.Open(fullPathWithRoot)
 
 }
 
 func (s *Store) writeStreams(key string, r io.Reader) error {
 	PathKey := s.PathTransform(key)
-
-	if err := os.MkdirAll(s.Root + "/" + PathKey.PathName, os.ModePerm); err != nil {
+	pathNameWithRoot := fmt.Sprintf("%s/%s", s.Root, PathKey.PathName)
+	if err := os.MkdirAll(pathNameWithRoot, os.ModePerm); err != nil {
 		return err
 	}
 
-	fullPath := PathKey.FullPath()
 
-	f, err := os.Create(s.Root + "/" + fullPath)
+	fullPathWithRoot := fmt.Sprintf("%s/%s", s.Root, PathKey.FullPath())
+	f, err := os.Create(fullPathWithRoot)
 	if err != nil {
 		return err
 	}
@@ -107,7 +107,7 @@ func (s *Store) writeStreams(key string, r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("written %d bytes: %s\n", n, fullPath)
+	fmt.Printf("written %d bytes: %s\n", n, fullPathWithRoot)
 	return nil
 }
 
