@@ -110,10 +110,12 @@ func (s *Store) writeStreams(key string, r io.Reader) error {
 	return nil
 }
 
+
+
 func (s *Store) Has(key string) bool {
 	pathkey := s.PathTransform(key)
-
-	_, err := os.Stat(pathkey.FullPath())
+	fullPathWithRoot := fmt.Sprintf("%s/%s", s.Root, pathkey.FullPath())
+	_, err := os.Stat(fullPathWithRoot)
 	if err == fs.ErrNotExist {
 		return false
 	}
@@ -144,4 +146,9 @@ func (s *Store) Delete(key string) error {
 	os.RemoveAll(firstPathNamewithRoot)
 
 	return nil 
+
+}
+
+func (s *Store) clear()  error {
+	return os.RemoveAll(s.Root)
 }
