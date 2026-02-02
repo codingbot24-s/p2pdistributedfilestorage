@@ -65,6 +65,11 @@ func NewStore(opts StoreOpts) *Store {
 	}
 }
 
+func (s *Store) Write(key string, r io.Reader) error {
+	return s.writeStreams(key, r)
+}
+
+
 func (s *Store) read(key string) (io.Reader, error) {
 	f, err := s.readStream(key)
 	if err != nil {
@@ -132,17 +137,13 @@ func (p *PathKey) FirstPathName() string {
 }
 
 func (s *Store) Delete(key string) error {
-	// get the hash
 	pathkey := s.PathTransform(key)
 	
 	defer func() {
-		// here only file
 		fmt.Printf("deleting [%s] from disk \n", pathkey.filename)
 		
 	}()
-	// delete the file with root 
 	firstPathNamewithRoot := fmt.Sprintf("%s/%s", s.Root, pathkey.FirstPathName())	
-	// TODO: cant remove the main dir  
 	os.RemoveAll(firstPathNamewithRoot)
 
 	return nil 
